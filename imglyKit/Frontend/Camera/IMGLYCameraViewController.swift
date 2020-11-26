@@ -17,9 +17,14 @@ private let FilterSelectionViewHeight = 100
 private let BottomControlSize = CGSize(width: 47, height: 47)
 public typealias IMGLYCameraCompletionBlock = (UIImage?, URL?) -> (Void)
 
+public protocol IMGStickerSelectDelegate: class {
+    func openPhotoCollection()
+}
+
 open class IMGLYCameraViewController: UIViewController {
     
     // MARK: - Initializers
+    public weak var delegate: IMGStickerSelectDelegate?
     
     public convenience init() {
         self.init(recordingModes: [.photo, .video])
@@ -596,6 +601,7 @@ open class IMGLYCameraViewController: UIViewController {
     fileprivate func showEditorNavigationControllerWithImage(_ image: UIImage) {
         let editorViewController = IMGLYMainEditorViewController()
         editorViewController.highResolutionImage = image
+        editorViewController.delegate = self.delegate
         if let cameraController = cameraController {
             editorViewController.initialFilterType = cameraController.effectFilter.filterType
             editorViewController.initialFilterIntensity = cameraController.effectFilter.inputIntensity

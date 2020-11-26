@@ -11,6 +11,10 @@ import UIKit
 let StickersCollectionViewCellSize = CGSize(width: 90, height: 90)
 let StickersCollectionViewCellReuseIdentifier = "StickersCollectionViewCell"
 
+extension Notification.Name {
+    public static let didImageSelect = Notification.Name(rawValue: "didImageSelectNotify")
+}
+
 open class IMGLYStickersEditorViewController: IMGLYSubEditorViewController {
 
     // MARK: - Properties
@@ -60,7 +64,34 @@ open class IMGLYStickersEditorViewController: IMGLYSubEditorViewController {
         }
     }
     
+    open override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        NotificationCenter.default.addObserver(self, selector: #selector(self.notificationReceived(_:)), name: .didImageSelect, object: nil)
+    }
+    
+    open override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        NotificationCenter.default.removeObserver(self, name: .didImageSelect, object: nil)
+    }
+    
     // MARK: - Helpers
+    
+    @objc func notificationReceived(_ notification: Notification) {
+        guard let img = notification.userInfo?["image"] as? UIImage else {
+            navigationController?.popViewController(animated: true)
+            return
+        }
+        let imageView = UIImageView(image: img)
+        imageView.isUserInteractionEnabled = true
+        imageView.frame.size = initialSizeForStickerImage(img)
+        imageView.center = CGPoint(x: stickersClipView.bounds.midX, y: stickersClipView.bounds.midY)
+        stickersClipView.addSubview(imageView)
+        imageView.transform = CGAffineTransform(scaleX: 0, y: 0)
+        
+        UIView.animate(withDuration: 0.5, delay: 0, usingSpringWithDamping: 0.5, initialSpringVelocity: 0, options: [], animations: { () -> Void in
+            imageView.transform = CGAffineTransform.identity
+            }, completion: nil)
+    }
     
     fileprivate func initialSizeForStickerImage(_ image: UIImage) -> CGSize {
         let initialMaxStickerSize = stickersClipView.bounds.width * 0.3
@@ -79,7 +110,7 @@ open class IMGLYStickersEditorViewController: IMGLYSubEditorViewController {
         let bundle = Bundle(for: type(of: self))
         navigationItem.title = NSLocalizedString("stickers-editor.title", tableName: nil, bundle: bundle, value: "", comment: "")
         
-        configureStickersCollectionView()
+        //configureStickersCollectionView()
         configureStickersClipView()
         configureGestureRecognizers()
         backupStickers()
@@ -89,6 +120,10 @@ open class IMGLYStickersEditorViewController: IMGLYSubEditorViewController {
     open override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         rerenderPreviewWithoutStickers()
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+            self.delegate?.openPhotoCollection()
+        }
     }
     
     override open func viewDidLayoutSubviews() {

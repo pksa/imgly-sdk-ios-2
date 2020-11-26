@@ -14,6 +14,7 @@ public typealias IMGLYPreviewImageGenerationCompletionBlock = () -> (Void)
 open class IMGLYSubEditorViewController: IMGLYEditorViewController {
     
     // MARK: - Properties
+    weak var delegate: IMGStickerSelectDelegate?
     
     public let fixedFilterStack: IMGLYFixedFilterStack
     open var completionHandler: IMGLYSubEditorCompletionBlock?

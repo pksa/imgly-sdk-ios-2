@@ -36,6 +36,7 @@ private let ButtonCollectionViewCellSize = CGSize(width: 66, height: 90)
 open class IMGLYMainEditorViewController: IMGLYEditorViewController {
     
     // MARK: - Properties
+    open weak var delegate: IMGStickerSelectDelegate?
     
     open lazy var actionButtons: [IMGLYActionButton] = {
         let bundle = Bundle(for: type(of: self))
@@ -171,6 +172,10 @@ open class IMGLYMainEditorViewController: IMGLYEditorViewController {
                 viewController.lowResolutionImage = lowResolutionImage
                 viewController.previewImageView.image = previewImageView.image
                 viewController.completionHandler = subEditorDidComplete
+                
+                if buttonType == .stickers {
+                    viewController.delegate = self.delegate
+                }
                 
                 show(viewController, sender: self)
             }

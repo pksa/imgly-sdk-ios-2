@@ -18,10 +18,21 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         let cameraViewController = IMGLYCameraViewController(recordingModes: [.photo, .video])
         cameraViewController.maximumVideoLength = 15
         cameraViewController.squareMode = true
-        
+        cameraViewController.delegate = self
         window = UIWindow(frame: UIScreen.main.bounds)
         window?.rootViewController = cameraViewController
         window?.makeKeyAndVisible()
+                        
+        /*let editorViewController = IMGLYMainEditorViewController()
+        editorViewController.highResolutionImage = UIImage(named: "img1")
+        editorViewController.initialFilterType = .none
+        editorViewController.initialFilterIntensity = 0.5
+        editorViewController.completionBlock = editorCompletionBlock
+        editorViewController.delegate = self
+        window = UIWindow(frame: UIScreen.main.bounds)
+        window?.rootViewController = editorViewController
+        window?.makeKeyAndVisible()*/
+                        
         return true
     }
     
@@ -46,6 +57,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func applicationWillTerminate(_ application: UIApplication) {
         // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
     }
-    
-    
+
+    func editorCompletionBlock(result: IMGLYEditorResult, image: UIImage?) {
+        
+    }
+}
+
+extension AppDelegate: IMGStickerSelectDelegate {
+    func openPhotoCollection() {
+        print("openPhotoCollection==")
+    }
 }
