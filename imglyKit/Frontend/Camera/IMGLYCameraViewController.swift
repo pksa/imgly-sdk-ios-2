@@ -25,7 +25,8 @@ open class IMGLYCameraViewController: UIViewController {
     
     // MARK: - Initializers
     public weak var delegate: IMGStickerSelectDelegate?
-    
+    open var editingCompletionBlock: IMGLYEditorCompletionBlock?
+
     public convenience init() {
         self.init(recordingModes: [.photo, .video])
     }
@@ -785,7 +786,11 @@ open class IMGLYCameraViewController: UIViewController {
     
     fileprivate func editorCompletionBlock(_ result: IMGLYEditorResult, image: UIImage?) {
         if let image = image, result == .done {
-            UIImageWriteToSavedPhotosAlbum(image, self, #selector(IMGLYCameraViewController.image(_:didFinishSavingWithError:contextInfo:)), nil)
+            //UIImageWriteToSavedPhotosAlbum(image, self, #selector(IMGLYCameraViewController.image(_:didFinishSavingWithError:contextInfo:)), nil)
+            self.editorCompletionBlock(result, image: image)
+            if let completionhandler = self.editingCompletionBlock {
+                completionhandler(result, image)
+            }
         }
         
         dismiss(animated: true, completion: nil)
