@@ -115,12 +115,13 @@ open class IMGLYStickersEditorViewController: IMGLYSubEditorViewController {
     open override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         rerenderPreviewWithoutStickers()
-        
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-            NotificationCenter.default.removeObserver(self, name: .didImageSelect, object: nil)
-            NotificationCenter.default.addObserver(self, selector: #selector(self.notificationReceived(_:)), name: .didImageSelect, object: nil)
-            self.delegate?.openPhotoCollection()
-        }
+    }
+    
+    open override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        NotificationCenter.default.removeObserver(self, name: .didImageSelect, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(self.notificationReceived(_:)), name: .didImageSelect, object: nil)
+        self.delegate?.openPhotoCollection()
     }
     
     override open func viewDidLayoutSubviews() {
