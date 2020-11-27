@@ -37,6 +37,7 @@ open class IMGLYMainEditorViewController: IMGLYEditorViewController {
     
     // MARK: - Properties
     open weak var delegate: IMGStickerSelectDelegate?
+    open var isEditingMode: Bool = false
     
     open lazy var actionButtons: [IMGLYActionButton] = {
         let bundle = Bundle(for: type(of: self))
@@ -224,25 +225,58 @@ open class IMGLYMainEditorViewController: IMGLYEditorViewController {
     // MARK: - EditorViewController
     
     override open func tappedDone(_ sender: UIBarButtonItem?) {
-        if let completionBlock = completionBlock {
-            highResolutionImage = highResolutionImage?.imgly_normalizedImage
-            var filteredHighResolutionImage: UIImage?
-            
-            if let highResolutionImage = self.highResolutionImage {
-                sender?.isEnabled = false
-                PhotoProcessorQueue.async {
-                    filteredHighResolutionImage = IMGLYPhotoProcessor.processWithUIImage(highResolutionImage, filters: self.fixedFilterStack.activeFilters)
+        
+        if self.isEditingMode == false {
+            if self.fixedFilterStack.stickerFilters.count > 0 {
+                if let completionBlock = completionBlock {
+                    highResolutionImage = highResolutionImage?.imgly_normalizedImage
+                    var filteredHighResolutionImage: UIImage?
                     
-                    DispatchQueue.main.async {
+                    if let highResolutionImage = self.highResolutionImage {
+                        sender?.isEnabled = false
+                        PhotoProcessorQueue.async {
+                            filteredHighResolutionImage = IMGLYPhotoProcessor.processWithUIImage(highResolutionImage, filters: self.fixedFilterStack.activeFilters)
+                            
+                            DispatchQueue.main.async {
+                                completionBlock(.done, filteredHighResolutionImage)
+                                sender?.isEnabled = true
+                            }
+                        }
+                    } else {
                         completionBlock(.done, filteredHighResolutionImage)
-                        sender?.isEnabled = true
                     }
+                } else {
+                    dismiss(animated: true, completion: nil)
+                }
+            }
+            else {
+                let alertController = UIAlertController(title: "Warning", message: "Please add sticker", preferredStyle: .alert)
+                let okAction = UIAlertAction(title: "Ok", style: .default, handler: nil)
+                alertController.addAction(okAction)
+                self.present(alertController, animated: true, completion: nil)
+            }
+        }
+        else {
+            if let completionBlock = completionBlock {
+                highResolutionImage = highResolutionImage?.imgly_normalizedImage
+                var filteredHighResolutionImage: UIImage?
+                
+                if let highResolutionImage = self.highResolutionImage {
+                    sender?.isEnabled = false
+                    PhotoProcessorQueue.async {
+                        filteredHighResolutionImage = IMGLYPhotoProcessor.processWithUIImage(highResolutionImage, filters: self.fixedFilterStack.activeFilters)
+                        
+                        DispatchQueue.main.async {
+                            completionBlock(.done, filteredHighResolutionImage)
+                            sender?.isEnabled = true
+                        }
+                    }
+                } else {
+                    completionBlock(.done, filteredHighResolutionImage)
                 }
             } else {
-                completionBlock(.done, filteredHighResolutionImage)
+                dismiss(animated: true, completion: nil)
             }
-        } else {
-            dismiss(animated: true, completion: nil)
         }
     }
     
