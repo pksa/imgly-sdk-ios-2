@@ -34,8 +34,8 @@ class IMGLYCircleLayerView: UIView {
         UIColor(red: 0.0, green: 0.0, blue: 0.0, alpha: 0.7).setFill()
         UIRectFill(rect)
         
-        
-        let circleSize = max(rect.size.width, rect.size.height) / 2
+        var circleSize = max(rect.size.width, rect.size.height) / 2
+        circleSize += 80
         
         let circle = UIBezierPath(ovalIn: CGRect(x: (rect.size.width/2) - (circleSize/2), y: (rect.size.height/2) - (circleSize/2), width: circleSize, height: circleSize))
         context?.setBlendMode(.clear)
