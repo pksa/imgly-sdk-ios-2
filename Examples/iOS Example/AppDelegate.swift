@@ -65,6 +65,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
 extension AppDelegate: IMGStickerSelectDelegate {
     func openPhotoCollection() {
-        print("openPhotoCollection==")
+        //print("openPhotoCollection==")
     }
 }

@@ -18,7 +18,7 @@ extension Notification.Name {
 open class IMGLYStickersEditorViewController: IMGLYSubEditorViewController {
 
     // MARK: - Properties
-    
+    let cutterView = IMGLYCircleLayerView()
     open var stickersDataSource = IMGLYStickersDataSource()
     open fileprivate(set) lazy var stickersClipView: UIView = {
         let view = UIView()
@@ -63,15 +63,11 @@ open class IMGLYStickersEditorViewController: IMGLYSubEditorViewController {
             super.tappedDone(sender)
         }
     }
-        
-    open override func viewWillDisappear(_ animated: Bool) {
-        super.viewWillDisappear(animated)
-        NotificationCenter.default.removeObserver(self, name: .didImageSelect, object: nil)
-    }
     
     // MARK: - Helpers
     
     @objc func notificationReceived(_ notification: Notification) {
+        self.updating = false
         guard let img = notification.userInfo?["image"] as? UIImage else {
             navigationController?.popViewController(animated: true)
             return
@@ -105,11 +101,15 @@ open class IMGLYStickersEditorViewController: IMGLYSubEditorViewController {
         let bundle = Bundle(for: type(of: self))
         navigationItem.title = NSLocalizedString("stickers-editor.title", tableName: nil, bundle: bundle, value: "", comment: "")
         
-        //configureStickersCollectionView()
+        configureStickersCollectionView()
+        
         configureStickersClipView()
+        configureCropView()
         configureGestureRecognizers()
         backupStickers()
         fixedFilterStack.stickerFilters.removeAll()
+        self.delegate?.openPhotoCollection()
+        self.updating = true
     }
     
     open override func viewDidAppear(_ animated: Bool) {
@@ -117,20 +117,29 @@ open class IMGLYStickersEditorViewController: IMGLYSubEditorViewController {
         rerenderPreviewWithoutStickers()
     }
     
+    open override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        NotificationCenter.default.removeObserver(self, name: .didImageSelect, object: nil)
+    }
+    
     open override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         NotificationCenter.default.removeObserver(self, name: .didImageSelect, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(self.notificationReceived(_:)), name: .didImageSelect, object: nil)
-        self.delegate?.openPhotoCollection()
     }
     
     override open func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         
         stickersClipView.frame = view.convert(previewImageView.visibleImageFrame, from: previewImageView)
+        cutterView.frame = view.convert(previewImageView.visibleImageFrame, from: previewImageView)
     }
-    
+        
     // MARK: - Configuration
+    
+    fileprivate func configureCropView() {
+        view.addSubview(cutterView)
+    }
     
     fileprivate func configureStickersCollectionView() {
         let flowLayout = UICollectionViewFlowLayout()
