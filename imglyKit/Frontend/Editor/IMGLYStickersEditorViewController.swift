@@ -101,7 +101,7 @@ open class IMGLYStickersEditorViewController: IMGLYSubEditorViewController {
         let bundle = Bundle(for: type(of: self))
         navigationItem.title = NSLocalizedString("stickers-editor.title", tableName: nil, bundle: bundle, value: "", comment: "")
         
-        //configureStickersCollectionView()
+        configureStickersCollectionView()
         
         configureStickersClipView()
         configureCropView()

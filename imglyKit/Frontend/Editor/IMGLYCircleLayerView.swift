@@ -34,28 +34,12 @@ class IMGLYCircleLayerView: UIView {
         UIColor(red: 0.0, green: 0.0, blue: 0.0, alpha: 0.7).setFill()
         UIRectFill(rect)
         
-        var circleSize = max(rect.size.width, rect.size.height) / 2
-        circleSize += 80
-        
-        let circle = UIBezierPath(ovalIn: CGRect(x: (rect.size.width/2) - (circleSize/2), y: (rect.size.height/2) - (circleSize/2), width: circleSize, height: circleSize))
+        let circleSize = min(rect.size.width, rect.size.height) / 2
+    
+        let circle = UIBezierPath(arcCenter: CGPoint(x: rect.midX, y: rect.midY), radius: CGFloat(circleSize), startAngle: CGFloat(0), endAngle: CGFloat(Double.pi * 2), clockwise: true)
         context?.setBlendMode(.clear)
         UIColor.clear.setFill()
         circle.fill()
-        
-        
-        /*let ratio: CGFloat = 1.0
-        let size = CGSize(width: rect.size.width, height: rect.size.width * ratio)
-        let scale = min(rect.size.width, rect.size.height)
-        
-        let scaledWidth = size.width * scale
-        let scaledHeight = size.height * scale
-        
-        let square = UIBezierPath(rect: CGRect(x: (bounds.width - scaledWidth) / 2.0, y: (bounds.height - scaledHeight) / 2.0, width: scaledWidth, height: scaledHeight))
-        
-        UIColor.lightGray.setStroke()
-        square.lineWidth = 1.0
-        context?.setBlendMode(.normal)
-        square.stroke()*/
         
     }
     
