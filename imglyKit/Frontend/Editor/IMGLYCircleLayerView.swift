@@ -45,7 +45,7 @@ class IMGLYCircleLayerView: UIView {
         let circleSize = min(self.circleFrame.width, self.circleFrame.size.height) / 2
     
         let circle = UIBezierPath(arcCenter: CGPoint(x: rect.midX, y: rect.midY), radius: CGFloat(circleSize), startAngle: CGFloat(0), endAngle: CGFloat(Double.pi * 2), clockwise: true)
-        print("BZ", circle.bounds)
+        //print("BZ", circle.bounds)
         self.circleBounds = circle.bounds
         context?.setBlendMode(.clear)
         UIColor.clear.setFill()

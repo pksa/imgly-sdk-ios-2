@@ -149,7 +149,7 @@ open class IMGLYStickersEditorViewController: IMGLYSubEditorViewController {
         let imageView = UIImageView(image: img)
         imageView.isUserInteractionEnabled = true
         imageView.frame.size = initialSizeForStickerImage(img)
-        imageView.center = CGPoint(x: self.cutterView.bounds.midX, y: self.cutterView.bounds.midY)
+        imageView.center = CGPoint(x: self.cutterView.circleBounds.midX, y: self.cutterView.circleBounds.midY)
         self.view.addSubview(imageView)
         imageView.transform = CGAffineTransform(scaleX: 0, y: 0)
         
@@ -387,7 +387,7 @@ extension IMGLYStickersEditorViewController: UICollectionViewDelegate {
         let imageView = UIImageView(image: sticker.image)
         imageView.isUserInteractionEnabled = true
         imageView.frame.size = initialSizeForStickerImage(sticker.image)
-        imageView.center = CGPoint(x: self.cutterView.bounds.midX, y: self.cutterView.bounds.midY)
+        imageView.center = CGPoint(x: self.cutterView.circleBounds.midX, y: self.cutterView.circleBounds.midY)
         
         view.addSubview(imageView)
         self.view.bringSubviewToFront(self.cutterView)
