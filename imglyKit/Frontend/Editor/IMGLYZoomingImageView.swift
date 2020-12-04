@@ -63,6 +63,7 @@ open class IMGLYZoomingImageView: UIScrollView {
         decelerationRate = .fast
         isExclusiveTouch = true
         delegate = self
+        contentMode = .scaleAspectFit
     }
     
     // MARK: - UIView

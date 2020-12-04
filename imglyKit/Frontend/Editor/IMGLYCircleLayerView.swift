@@ -10,6 +10,14 @@ import UIKit
 
 class IMGLYCircleLayerView: UIView {
 
+    var circleFrame: CGRect = .zero  {
+        didSet {
+            setNeedsLayout()
+        }
+    }
+    
+    var circleBounds: CGRect = .zero
+    
     override var frame: CGRect {
         
         didSet {
@@ -34,9 +42,11 @@ class IMGLYCircleLayerView: UIView {
         UIColor(red: 0.0, green: 0.0, blue: 0.0, alpha: 0.7).setFill()
         UIRectFill(rect)
         
-        let circleSize = min(rect.size.width, rect.size.height) / 2
+        let circleSize = min(self.circleFrame.width, self.circleFrame.size.height) / 2
     
-        let circle = UIBezierPath(arcCenter: CGPoint(x: rect.midX, y: rect.midY), radius: CGFloat(circleSize), startAngle: CGFloat(0), endAngle: CGFloat(Double.pi * 2), clockwise: true)
+        let circle = UIBezierPath(arcCenter: CGPoint(x: self.circleFrame.midX, y: self.circleFrame.midY), radius: CGFloat(circleSize), startAngle: CGFloat(0), endAngle: CGFloat(Double.pi * 2), clockwise: true)
+        print("BZ", circle.bounds)
+        self.circleBounds = circle.bounds
         context?.setBlendMode(.clear)
         UIColor.clear.setFill()
         circle.fill()
@@ -51,6 +61,13 @@ class IMGLYCircleLayerView: UIView {
             }
         }
         return false
+    }
+    
+    var circleInset: CGRect {
+        let rect = bounds
+        let minSize = min(rect.width, rect.height)
+        let hole = CGRect(x: (rect.width - minSize) / 2, y: (rect.height - minSize) / 2, width: minSize, height: minSize).insetBy(dx: 5, dy: 5)
+        return hole
     }
 
 }

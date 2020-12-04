@@ -73,7 +73,7 @@ open class IMGLYCropEditorViewController: IMGLYSubEditorViewController {
     
     fileprivate lazy var transparentRectView: UIView = {
         let view = UIView()
-        view.backgroundColor = UIColor(red: 0, green: 0, blue: 0, alpha: 0.8)
+        view.backgroundColor = .red//UIColor(red: 0, green: 0, blue: 0, alpha: 0.8)
         return view
         }()
     
@@ -132,6 +132,10 @@ open class IMGLYCropEditorViewController: IMGLYSubEditorViewController {
         updatePreviewImageWithCompletion {
             super.tappedDone(sender)
         }
+    }
+    
+    open override var enableZoomingInPreviewImage: Bool {
+        return true
     }
     
     // MARK: - Configuration

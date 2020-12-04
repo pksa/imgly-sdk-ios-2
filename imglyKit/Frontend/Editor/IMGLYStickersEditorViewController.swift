@@ -25,26 +25,33 @@ open class IMGLYStickersEditorViewController: IMGLYSubEditorViewController {
         view.clipsToBounds = true
         return view
         }()
-    
+    fileprivate var isViewDidAppear: Bool = false
     fileprivate var draggedView: UIView?
     fileprivate var tempStickerCopy = [CIFilter]()
+    
+    fileprivate var cropRect = CGRect.zero
+    fileprivate var cropRectLeftBound = CGFloat(0)
+    fileprivate var cropRectRightBound = CGFloat(0)
+    fileprivate var cropRectTopBound = CGFloat(0)
+    fileprivate var cropRectBottomBound = CGFloat(0)
+
     
     // MARK: - SubEditorViewController
     
     open override func tappedDone(_ sender: UIBarButtonItem?) {
         var addedStickers = false
         
-        for view in stickersClipView.subviews {
+        for view in self.view.subviews {
             if let view = view as? UIImageView {
                 if let image = view.image {
                     let stickerFilter = IMGLYInstanceFactory.stickerFilter()
                     stickerFilter.sticker = image
-                    let center = CGPoint(x: view.center.x / stickersClipView.frame.size.width,
-                                         y: view.center.y / stickersClipView.frame.size.height)
+                    let center = CGPoint(x: view.center.x / self.cutterView.frame.size.width,
+                                         y: view.center.y / self.cutterView.frame.size.height)
                     
                     var size = initialSizeForStickerImage(image)
-                    size.width = size.width / stickersClipView.bounds.size.width
-                    size.height = size.height / stickersClipView.bounds.size.height
+                    size.width = size.width / self.cutterView.bounds.size.width
+                    size.height = size.height / self.cutterView.bounds.size.height
                     stickerFilter.center = center
                     stickerFilter.scale = size.width
                     stickerFilter.transform = view.transform
@@ -55,6 +62,7 @@ open class IMGLYStickersEditorViewController: IMGLYSubEditorViewController {
         }
         
         if addedStickers {
+            self.fixedFilterStack.orientationCropFilter.cropRect = normalizedCropRect()
             updatePreviewImageWithCompletion {
                 self.stickersClipView.removeFromSuperview()
                 super.tappedDone(sender)
@@ -62,6 +70,100 @@ open class IMGLYStickersEditorViewController: IMGLYSubEditorViewController {
         } else {
             super.tappedDone(sender)
         }
+    }
+    
+    fileprivate func reCalculateCropRectBounds() {
+        let width = self.cutterView.frame.size.width
+        let height = self.cutterView.frame.size.height
+        cropRectLeftBound = (width - previewImageView.visibleImageFrame.size.width) / 2.0
+        cropRectRightBound = width - cropRectLeftBound
+        cropRectTopBound = (height - previewImageView.visibleImageFrame.size.height) / 2.0
+        cropRectBottomBound = height - cropRectTopBound
+    }
+
+    fileprivate func normalizedCropRect() -> CGRect {
+        //setCropRectForSelectionRatio()
+        //reCalculateCropRectBounds()
+        /*let boundWidth = cropRectRightBound - cropRectLeftBound
+        let boundHeight = cropRectBottomBound - cropRectTopBound
+        
+        //return CGRect(x: x, y: y, width: self.cropRe  ct.size.width / boundWidth, height: self.cropRect.size.height / boundHeight)
+        let size = CGSize(width: self.previewImageView.visibleImageFrame.size.width * self.previewImageView.zoomScale, height: self.previewImageView.visibleImageFrame.size.height * self.previewImageView.zoomScale)
+        let x = (self.cropRect.origin.x - cropRectLeftBound) / size.width
+        let y = (self.cropRect.origin.y - cropRectTopBound) / size.height
+        
+        let rect = CGRect(x: x, y: y, width: size.width, height: size.height)
+        print("Rect ==>", rect)
+        
+        
+        let imageSize = previewImageView.image?.size ?? CGSize(width: 100, height: 100)
+        let witdh = self.cutterView.circleFrame.width * self.previewImageView.zoomScale
+        let height = self.cutterView.circleFrame.height * self.previewImageView.zoomScale
+        let posx = (self.cropRect.origin.x - previewImageView.visibleImageFrame.origin.x) / previewImageView.visibleImageFrame.width
+        let posy = (self.cropRect.origin.y - previewImageView.visibleImageFrame.origin.y) / previewImageView.visibleImageFrame.height*/
+        
+        
+        if self.previewImageView.minimumZoomScale == self.previewImageView.zoomScale {
+            setCropRectForSelectionRatio()
+            reCalculateCropRectBounds()
+            let boundWidth = cropRectRightBound - cropRectLeftBound
+            let boundHeight = cropRectBottomBound - cropRectTopBound
+            
+            let size = CGSize(width: self.previewImageView.visibleImageFrame.size.width * self.previewImageView.zoomScale, height: self.previewImageView.visibleImageFrame.size.height * self.previewImageView.zoomScale)
+            let x = (self.cropRect.origin.x - cropRectLeftBound) / size.width
+            let y = (self.cropRect.origin.y - cropRectTopBound) / size.height
+            return CGRect(x: x, y: y, width: boundWidth, height: boundHeight)
+        }
+        else {
+            let scale: CGFloat = 1/previewImageView.zoomScale
+
+            /*let x: CGFloat = previewImageView.contentOffset.x * scale
+            let y: CGFloat = previewImageView.contentOffset.y * scale
+            let width: CGFloat = previewImageView.frame.size.width * scale
+            let height: CGFloat = previewImageView.frame.size.height * scale*/
+            
+            let x: CGFloat = (previewImageView.contentOffset.x + self.cutterView.circleBounds.origin.x) * scale
+            let y: CGFloat = (previewImageView.contentOffset.y + self.cutterView.circleBounds.origin.y) * scale
+            let width: CGFloat = self.cutterView.circleBounds.size.width * scale
+            let height: CGFloat = self.cutterView.circleBounds.size.height * scale
+            
+            let posX = x / self.previewImageView.image!.size.width
+            let posY = y / self.previewImageView.image!.size.height
+            let posWidth = width / self.previewImageView.image!.size.width
+            let posHeight = height / self.previewImageView.image!.size.height
+            
+            /*let newFrame = CGRect(x: x1, y: y1, width: width1, height: height1)
+            let croppedCGImage = previewImageView.image?.cgImage?.cropping(to: newFrame)
+            
+            print("new Frame =>", newFrame)
+            print("Cutter", self.cutterView.frame, self.cutterView.circleFrame, newFrame)
+            print("xyw =>",x, y, width, height, x2, y2, width2, height2)*/
+            
+            let cropFrame = CGRect(x: posX, y: posY, width: posWidth, height: posHeight)
+            return cropFrame
+        }
+    }
+    
+    fileprivate func setCropRectForSelectionRatio() {
+        let size = CGSize(width: cropRectRightBound - cropRectLeftBound,
+            height: cropRectBottomBound - cropRectTopBound)
+        var rectWidth = size.width
+        var rectHeight = rectWidth
+        if size.width > size.height {
+            rectHeight = size.height
+            rectWidth = rectHeight
+        }
+        rectHeight /= 1
+        
+        let sizeDeltaX = (size.width - rectWidth) / 2.0
+        let sizeDeltaY = (size.height - rectHeight) / 2.0
+        
+        self.cropRect = CGRect(
+            x: cropRectLeftBound  + sizeDeltaX,
+            y: cropRectTopBound + sizeDeltaY,
+            width: rectWidth,
+            height: rectHeight)
+        //print("crop Rect ==>", self.cropRect, self.cutterView.frame)
     }
     
     // MARK: - Helpers
@@ -75,8 +177,8 @@ open class IMGLYStickersEditorViewController: IMGLYSubEditorViewController {
         let imageView = UIImageView(image: img)
         imageView.isUserInteractionEnabled = true
         imageView.frame.size = initialSizeForStickerImage(img)
-        imageView.center = CGPoint(x: stickersClipView.bounds.midX, y: stickersClipView.bounds.midY)
-        stickersClipView.addSubview(imageView)
+        imageView.center = CGPoint(x: self.cutterView.bounds.midX, y: self.cutterView.bounds.midY)
+        self.view.addSubview(imageView)
         imageView.transform = CGAffineTransform(scaleX: 0, y: 0)
         
         UIView.animate(withDuration: 0.5, delay: 0, usingSpringWithDamping: 0.5, initialSpringVelocity: 0, options: [], animations: { () -> Void in
@@ -93,6 +195,10 @@ open class IMGLYStickersEditorViewController: IMGLYSubEditorViewController {
         return CGSize(width: image.size.width * scale, height: image.size.height * scale)
     }
     
+    open override var enableZoomingInPreviewImage: Bool {
+        return true
+    }
+    
     // MARK: - UIViewController
     
     override open func viewDidLoad() {
@@ -101,20 +207,24 @@ open class IMGLYStickersEditorViewController: IMGLYSubEditorViewController {
         let bundle = Bundle(for: type(of: self))
         navigationItem.title = NSLocalizedString("stickers-editor.title", tableName: nil, bundle: bundle, value: "", comment: "")
         
-        //configureStickersCollectionView()
+        configureStickersCollectionView()
         
         configureStickersClipView()
         configureCropView()
         configureGestureRecognizers()
         backupStickers()
+        if self.fixedFilterStack.stickerFilters.count == 0{
+            self.delegate?.openPhotoCollection()
+            self.updating = true
+        }
         fixedFilterStack.stickerFilters.removeAll()
-        self.delegate?.openPhotoCollection()
-        self.updating = true
     }
     
     open override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         rerenderPreviewWithoutStickers()
+        self.isViewDidAppear = true
+        self.setCropRectForSelectionRatio()
     }
     
     open override func viewWillDisappear(_ animated: Bool) {
@@ -131,8 +241,13 @@ open class IMGLYStickersEditorViewController: IMGLYSubEditorViewController {
     override open func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         
+        guard self.isViewDidAppear == false else {
+            return
+        }
         stickersClipView.frame = view.convert(previewImageView.visibleImageFrame, from: previewImageView)
-        cutterView.frame = view.convert(previewImageView.visibleImageFrame, from: previewImageView)
+        cutterView.frame = self.previewImageView.frame
+        cutterView.circleFrame = view.convert(previewImageView.visibleImageFrame, from: previewImageView)
+        reCalculateCropRectBounds()
     }
         
     // MARK: - Configuration
@@ -162,6 +277,7 @@ open class IMGLYStickersEditorViewController: IMGLYSubEditorViewController {
     }
     
     fileprivate func configureStickersClipView() {
+        stickersClipView.isUserInteractionEnabled = false
         view.addSubview(stickersClipView)
     }
     
@@ -169,35 +285,35 @@ open class IMGLYStickersEditorViewController: IMGLYSubEditorViewController {
         let panGestureRecognizer = UIPanGestureRecognizer(target: self, action: #selector(IMGLYStickersEditorViewController.panned(_:)))
         panGestureRecognizer.minimumNumberOfTouches = 1
         panGestureRecognizer.maximumNumberOfTouches = 1
-        stickersClipView.addGestureRecognizer(panGestureRecognizer)
+        view.addGestureRecognizer(panGestureRecognizer)
         
         let pinchGestureRecognizer = UIPinchGestureRecognizer(target: self, action: #selector(IMGLYStickersEditorViewController.pinched(_:)))
         pinchGestureRecognizer.delegate = self
-        stickersClipView.addGestureRecognizer(pinchGestureRecognizer)
+        view.addGestureRecognizer(pinchGestureRecognizer)
         
         let rotationGestureRecognizer = UIRotationGestureRecognizer(target: self, action: #selector(IMGLYStickersEditorViewController.rotated(_:)))
         rotationGestureRecognizer.delegate = self
-        stickersClipView.addGestureRecognizer(rotationGestureRecognizer)
+        view.addGestureRecognizer(rotationGestureRecognizer)
     }
     
     // MARK: - Gesture Handling
     
     @objc fileprivate func panned(_ recognizer: UIPanGestureRecognizer) {
-        let location = recognizer.location(in: stickersClipView)
-        let translation = recognizer.translation(in: stickersClipView)
+        let location = recognizer.location(in: self.view)
+        let translation = recognizer.translation(in: self.view)
         
         switch recognizer.state {
         case .began:
-            draggedView = stickersClipView.hitTest(location, with: nil) as? UIImageView
-            if let draggedView = draggedView {
-                stickersClipView.bringSubviewToFront(draggedView)
-            }
+            draggedView = view.hitTest(location, with: nil) as? UIImageView
         case .changed:
             if let draggedView = draggedView {
+                guard draggedView.center.y + translation.y < self.cutterView.frame.maxY && draggedView.center.y + translation.y > self.cutterView.frame.minY  else {
+                    return
+                }
                 draggedView.center = CGPoint(x: draggedView.center.x + translation.x, y: draggedView.center.y + translation.y)
             }
             
-            recognizer.setTranslation(CGPoint.zero, in: stickersClipView)
+            recognizer.setTranslation(CGPoint.zero, in: self.view)
         case .cancelled, .ended:
             draggedView = nil
         default:
@@ -207,19 +323,15 @@ open class IMGLYStickersEditorViewController: IMGLYSubEditorViewController {
     
     @objc fileprivate func pinched(_ recognizer: UIPinchGestureRecognizer) {
         if recognizer.numberOfTouches == 2 {
-            let point1 = recognizer.location(ofTouch: 0, in: stickersClipView)
-            let point2 = recognizer.location(ofTouch: 1, in: stickersClipView)
+            let point1 = recognizer.location(ofTouch: 0, in: self.view)
+            let point2 = recognizer.location(ofTouch: 1, in: self.view)
             let midpoint = CGPoint(x:(point1.x + point2.x) / 2, y: (point1.y + point2.y) / 2)
             let scale = recognizer.scale
             
             switch recognizer.state {
             case .began:
                 if draggedView == nil {
-                    draggedView = stickersClipView.hitTest(midpoint, with: nil) as? UIImageView
-                }
-                
-                if let draggedView = draggedView {
-                    stickersClipView.bringSubviewToFront(draggedView)
+                    draggedView = self.view.hitTest(midpoint, with: nil) as? UIImageView
                 }
             case .changed:
                 if let draggedView = draggedView {
@@ -237,19 +349,15 @@ open class IMGLYStickersEditorViewController: IMGLYSubEditorViewController {
     
     @objc fileprivate func rotated(_ recognizer: UIRotationGestureRecognizer) {
         if recognizer.numberOfTouches == 2 {
-            let point1 = recognizer.location(ofTouch: 0, in: stickersClipView)
-            let point2 = recognizer.location(ofTouch: 1, in: stickersClipView)
+            let point1 = recognizer.location(ofTouch: 0, in: self.view)
+            let point2 = recognizer.location(ofTouch: 1, in: self.view)
             let midpoint = CGPoint(x:(point1.x + point2.x) / 2, y: (point1.y + point2.y) / 2)
             let rotation = recognizer.rotation
             
             switch recognizer.state {
             case .began:
                 if draggedView == nil {
-                    draggedView = stickersClipView.hitTest(midpoint, with: nil) as? UIImageView
-                }
-                
-                if let draggedView = draggedView {
-                    stickersClipView.bringSubviewToFront(draggedView)
+                    draggedView = self.view.hitTest(midpoint, with: nil) as? UIImageView
                 }
             case .changed:
                 if let draggedView = draggedView {
@@ -283,14 +391,14 @@ open class IMGLYStickersEditorViewController: IMGLYSubEditorViewController {
             let imageView = UIImageView(image: stickerFilter.sticker)
             imageView.isUserInteractionEnabled = true
             
-            let size = stickerFilter.absolutStickerSizeForImageSize(stickersClipView.bounds.size)
+            let size = stickerFilter.absolutStickerSizeForImageSize(cutterView.bounds.size)
             imageView.frame.size = size
             
-            let center = CGPoint(x: stickerFilter.center.x * stickersClipView.frame.size.width,
-                                 y: stickerFilter.center.y * stickersClipView.frame.size.height)
+            let center = CGPoint(x: stickerFilter.center.x * self.cutterView.frame.size.width,
+                                 y: stickerFilter.center.y * cutterView.frame.size.height)
             imageView.center = center
             imageView.transform = stickerFilter.transform
-            stickersClipView.addSubview(imageView)
+            view.addSubview(imageView)
         }
     }
     
@@ -306,8 +414,10 @@ extension IMGLYStickersEditorViewController: UICollectionViewDelegate {
         let imageView = UIImageView(image: sticker.image)
         imageView.isUserInteractionEnabled = true
         imageView.frame.size = initialSizeForStickerImage(sticker.image)
-        imageView.center = CGPoint(x: stickersClipView.bounds.midX, y: stickersClipView.bounds.midY)
-        stickersClipView.addSubview(imageView)
+        imageView.center = CGPoint(x: self.cutterView.bounds.midX, y: self.cutterView.bounds.midY)
+        
+        view.addSubview(imageView)
+        self.view.bringSubviewToFront(self.cutterView)
         imageView.transform = CGAffineTransform(scaleX: 0, y: 0)
         
         UIView.animate(withDuration: 0.5, delay: 0, usingSpringWithDamping: 0.5, initialSpringVelocity: 0, options: [], animations: { () -> Void in
