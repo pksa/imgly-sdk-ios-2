@@ -184,6 +184,7 @@ open class IMGLYStickersEditorViewController: IMGLYSubEditorViewController {
         UIView.animate(withDuration: 0.5, delay: 0, usingSpringWithDamping: 0.5, initialSpringVelocity: 0, options: [], animations: { () -> Void in
             imageView.transform = CGAffineTransform.identity
             }, completion: nil)
+        self.view.bringSubviewToFront(self.cutterView)
     }
     
     fileprivate func initialSizeForStickerImage(_ image: UIImage) -> CGSize {
