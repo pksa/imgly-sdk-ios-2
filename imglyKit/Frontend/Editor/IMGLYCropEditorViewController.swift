@@ -483,7 +483,9 @@ open class IMGLYCropEditorViewController: IMGLYSubEditorViewController {
         let boundHeight = cropRectBottomBound - cropRectTopBound
         let x = (cropRectComponent.cropRect.origin.x - cropRectLeftBound) / boundWidth
         let y = (cropRectComponent.cropRect.origin.y - cropRectTopBound) / boundHeight
-        return CGRect(x: x, y: y, width: cropRectComponent.cropRect.size.width / boundWidth, height: cropRectComponent.cropRect.size.height / boundHeight)
+        let cropRect = CGRect(x: x, y: y, width: cropRectComponent.cropRect.size.width / boundWidth, height: cropRectComponent.cropRect.size.height / boundHeight)
+        print("Crop Rect=>", cropRect)
+        return cropRect
     }
     
     fileprivate func reCalculateCropRectBounds() {

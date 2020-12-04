@@ -82,37 +82,16 @@ open class IMGLYStickersEditorViewController: IMGLYSubEditorViewController {
     }
 
     fileprivate func normalizedCropRect() -> CGRect {
-        //setCropRectForSelectionRatio()
-        //reCalculateCropRectBounds()
-        /*let boundWidth = cropRectRightBound - cropRectLeftBound
-        let boundHeight = cropRectBottomBound - cropRectTopBound
-        
-        //return CGRect(x: x, y: y, width: self.cropRe  ct.size.width / boundWidth, height: self.cropRect.size.height / boundHeight)
-        let size = CGSize(width: self.previewImageView.visibleImageFrame.size.width * self.previewImageView.zoomScale, height: self.previewImageView.visibleImageFrame.size.height * self.previewImageView.zoomScale)
-        let x = (self.cropRect.origin.x - cropRectLeftBound) / size.width
-        let y = (self.cropRect.origin.y - cropRectTopBound) / size.height
-        
-        let rect = CGRect(x: x, y: y, width: size.width, height: size.height)
-        print("Rect ==>", rect)
-        
-        
-        let imageSize = previewImageView.image?.size ?? CGSize(width: 100, height: 100)
-        let witdh = self.cutterView.circleFrame.width * self.previewImageView.zoomScale
-        let height = self.cutterView.circleFrame.height * self.previewImageView.zoomScale
-        let posx = (self.cropRect.origin.x - previewImageView.visibleImageFrame.origin.x) / previewImageView.visibleImageFrame.width
-        let posy = (self.cropRect.origin.y - previewImageView.visibleImageFrame.origin.y) / previewImageView.visibleImageFrame.height*/
-        
         
         if self.previewImageView.minimumZoomScale == self.previewImageView.zoomScale {
             setCropRectForSelectionRatio()
             reCalculateCropRectBounds()
             let boundWidth = cropRectRightBound - cropRectLeftBound
             let boundHeight = cropRectBottomBound - cropRectTopBound
-            
-            let size = CGSize(width: self.previewImageView.visibleImageFrame.size.width * self.previewImageView.zoomScale, height: self.previewImageView.visibleImageFrame.size.height * self.previewImageView.zoomScale)
-            let x = (self.cropRect.origin.x - cropRectLeftBound) / size.width
-            let y = (self.cropRect.origin.y - cropRectTopBound) / size.height
-            return CGRect(x: x, y: y, width: boundWidth, height: boundHeight)
+            let x = (self.cropRect.origin.x - cropRectLeftBound) / boundWidth
+            let y = (self.cropRect.origin.y - cropRectTopBound) / boundHeight
+            let cropRect = CGRect(x: x, y: y, width: self.cropRect.size.width / boundWidth, height: self.cropRect.size.height / boundHeight)
+            return cropRect
         }
         else {
             let scale: CGFloat = 1/previewImageView.zoomScale
@@ -131,13 +110,6 @@ open class IMGLYStickersEditorViewController: IMGLYSubEditorViewController {
             let posY = y / self.previewImageView.image!.size.height
             let posWidth = width / self.previewImageView.image!.size.width
             let posHeight = height / self.previewImageView.image!.size.height
-            
-            /*let newFrame = CGRect(x: x1, y: y1, width: width1, height: height1)
-            let croppedCGImage = previewImageView.image?.cgImage?.cropping(to: newFrame)
-            
-            print("new Frame =>", newFrame)
-            print("Cutter", self.cutterView.frame, self.cutterView.circleFrame, newFrame)
-            print("xyw =>",x, y, width, height, x2, y2, width2, height2)*/
             
             let cropFrame = CGRect(x: posX, y: posY, width: posWidth, height: posHeight)
             return cropFrame
