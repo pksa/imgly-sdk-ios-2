@@ -205,7 +205,6 @@ open class IMGLYStickersEditorViewController: IMGLYSubEditorViewController {
         } else {
             reCalculateCropRectBounds()
         }
-        self.view.tag = 101
     }
     
     open override func viewDidAppear(_ animated: Bool) {
@@ -308,7 +307,7 @@ open class IMGLYStickersEditorViewController: IMGLYSubEditorViewController {
             draggedView = view.hitTest(location, with: nil) as? UIImageView
         case .changed:
             if let draggedView = draggedView {
-                guard  (draggedView.center.y + translation.y < self.circleOverlyView.circleBounds.maxY && draggedView.center.y + translation.y > self.circleOverlyView.circleBounds.minY) && (draggedView.center.x + translation.x > self.circleOverlyView.circleBounds.minX && draggedView.center.x + translation.x < self.circleOverlyView.circleBounds.maxX) else {
+                guard  (draggedView.center.y + translation.y < self.circleOverlyView.frame.maxY && draggedView.center.y + translation.y > self.circleOverlyView.frame.minY) && (draggedView.center.x + translation.x > self.circleOverlyView.frame.minX && draggedView.center.x + translation.x < self.circleOverlyView.frame.maxX) else {
                     return
                 }
                 draggedView.center = CGPoint(x: draggedView.center.x + translation.x, y: draggedView.center.y + translation.y)
@@ -392,7 +391,7 @@ open class IMGLYStickersEditorViewController: IMGLYSubEditorViewController {
             let imageView = UIImageView(image: stickerFilter.sticker)
             imageView.isUserInteractionEnabled = true
             
-            let size = stickerFilter.absolutStickerSizeForImageSize(circleOverlyView.bounds.size)
+            let size = stickerFilter.absolutStickerSizeForImageSize(stickersClipView.bounds.size)
             imageView.frame.size = size
             
             let center = CGPoint(x: stickerFilter.center.x * self.circleOverlyView.frame.size.width,
@@ -416,7 +415,7 @@ extension IMGLYStickersEditorViewController: UICollectionViewDelegate {
         let imageView = UIImageView(image: sticker.image)
         imageView.isUserInteractionEnabled = true
         imageView.frame.size = initialSizeForStickerImage(sticker.image)
-        imageView.center = CGPoint(x: self.circleOverlyView.circleBounds.midX, y: self.circleOverlyView.circleBounds.midY)
+        imageView.center = CGPoint(x: self.circleOverlyView.frame.midX, y: self.circleOverlyView.frame.midY)
         view.addSubview(imageView)
         self.view.bringSubviewToFront(self.circleOverlyView)
         imageView.transform = CGAffineTransform(scaleX: 0, y: 0)
@@ -430,9 +429,7 @@ extension IMGLYStickersEditorViewController: UICollectionViewDelegate {
 extension IMGLYStickersEditorViewController: UIGestureRecognizerDelegate {
     public func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
         if (gestureRecognizer is UIPinchGestureRecognizer && otherGestureRecognizer is UIRotationGestureRecognizer) || (gestureRecognizer is UIRotationGestureRecognizer && otherGestureRecognizer is UIPinchGestureRecognizer) {
-            
-            print("gestureRecognizer",gestureRecognizer.view?.tag ?? "-1")
-            
+                        
             return true
         }
         

@@ -50,13 +50,6 @@ class IMGLYCircleLayerView: UIView {
         context?.setBlendMode(.clear)
         UIColor.clear.setFill()
         circle.fill()
-        
-        /*let square = UIBezierPath(rect: CGRect(x: self.circleBounds.origin.x, y: self.circleBounds.origin.y, width: self.circleBounds.width, height: self.circleBounds.height))
-        UIColor.lightGray.setStroke()
-        square.lineWidth = 1.0
-        context?.setBlendMode(.normal)
-        square.stroke()*/
-        
     }
     
     //Allow touches through the circle crop cutter view
